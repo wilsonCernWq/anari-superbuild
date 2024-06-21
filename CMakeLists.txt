@@ -71,7 +71,7 @@ set(DEFAULT_BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE
 #
 # ------------------------------------------------------------------
 
-option(BUILD_ANARI_SDK "Build ANARI SDK from source?" OFF)
+option(BUILD_ANARI_SDK "Build ANARI SDK from source?" ON)
 if(BUILD_ANARI_SDK)
   include(dep_anari)
   include(dep_anari_ospray)
