@@ -5,11 +5,13 @@
 set(COMPONENT_NAME anari)
 set(COMPONENT_PATH ${INSTALL_DIR_ABSOLUTE})
 
-if(BUILD_GLFW AND BUILD_GLAD)
-  set(BUILD_VIEWER ON)
-else()
-  set(BUILD_VIEWER OFF)
-endif()
+# if(BUILD_GLFW AND BUILD_GLAD)
+#   set(BUILD_VIEWER ON)
+# else()
+#   set(BUILD_VIEWER OFF)
+# endif()
+
+set(BUILD_VIEWER ON CACHE BOOL "Build ANARI viewer" FORCE)
 
 
 ExternalProject_Add(${COMPONENT_NAME}

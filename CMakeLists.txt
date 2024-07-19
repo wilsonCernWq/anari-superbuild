@@ -71,6 +71,16 @@ set(DEFAULT_BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE
 #
 # ------------------------------------------------------------------
 
+option(BUILD_GLFW "Build glfw from source or use one in existing environment?" ON)
+if(BUILD_GLFW AND NOT BUILD_OPENVKL)
+  include(dep_glfw)
+endif()
+
+option(BUILD_GLAD "Build glad from source or use one in existing environment?" ON)
+if(BUILD_GLAD)
+  include(dep_glad)
+endif()
+
 option(BUILD_ANARI_SDK "Build ANARI SDK from source?" ON)
 if(BUILD_ANARI_SDK)
   include(dep_anari)
