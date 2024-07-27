@@ -8,12 +8,44 @@ mkdir build
 
 ## Build Anari
 
+Add BARNEY
+```bash
+cd <root>
+git clone --recursive https://github.com/ingowald/barney.git
+```
+Replace `*CommitObserver` to `*ChangeObserver`.
+
 Outputs are installed into `build/install`.
 
 ```bash
 cd build
 cmake ..
 make -j8
+make anari-ospray
+make anari-barney
+```
+
+#### Tutorial
+
+```bash
+cd build/anari/build
+./anariTutorialCpp
+```
+
+```bash
+ANARI_LIBRARY=helide ./anariViewer 
+```
+
+```bash
+# make sure libanari_library_ospray.so has been compiled
+export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
+ANARI_LIBRARY=ospray ./anariViewer 
+```
+
+```bash
+# make sure libanari_library_barney.so has been compiled
+export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
+ANARI_LIBRARY=barney ./anariViewer 
 ```
 
 ## Build Ascent Dependencies with Anari
