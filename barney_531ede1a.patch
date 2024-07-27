@@ -1,0 +1,108 @@
+diff --git a/anari/Geometry.cpp b/anari/Geometry.cpp
+index 1d2595b..5f604cb 100644
+--- a/anari/Geometry.cpp
++++ b/anari/Geometry.cpp
+@@ -64,9 +64,9 @@ void Sphere::commit()
+ 
+   m_generatedIndices.clear();
+ 
+-  m_vertexPosition->addCommitObserver(this);
++  m_vertexPosition->addChangeObserver(this);
+   if (m_vertexRadius)
+-    m_vertexRadius->addCommitObserver(this);
++    m_vertexRadius->addChangeObserver(this);
+ }
+ 
+ BNGeom Sphere::makeBarneyGeometry(
+@@ -132,11 +132,11 @@ bool Sphere::isValid() const
+ void Sphere::cleanup()
+ {
+   if (m_index)
+-    m_index->removeCommitObserver(this);
++    m_index->removeChangeObserver(this);
+   if (m_vertexPosition)
+-    m_vertexPosition->removeCommitObserver(this);
++    m_vertexPosition->removeChangeObserver(this);
+   if (m_vertexRadius)
+-    m_vertexRadius->removeCommitObserver(this);
++    m_vertexRadius->removeChangeObserver(this);
+ }
+ 
+ Triangle::Triangle(BarneyGlobalState *s) : Geometry(s) {}
+@@ -158,9 +158,9 @@ void Triangle::commit()
+ 
+   m_generatedIndices.clear();
+ 
+-  m_vertexPosition->addCommitObserver(this);
++  m_vertexPosition->addChangeObserver(this);
+   if (m_index) {
+-    m_index->addCommitObserver(this);
++    m_index->addChangeObserver(this);
+   } else {
+     m_generatedIndices.resize(m_vertexPosition->totalSize());
+     std::iota(m_generatedIndices.begin(), m_generatedIndices.end(), 0);
+@@ -224,9 +224,9 @@ bool Triangle::isValid() const
+ void Triangle::cleanup()
+ {
+   if (m_index)
+-    m_index->removeCommitObserver(this);
++    m_index->removeChangeObserver(this);
+   if (m_vertexPosition)
+-    m_vertexPosition->removeCommitObserver(this);
++    m_vertexPosition->removeChangeObserver(this);
+ }
+ 
+ } // namespace barney_device
+diff --git a/anari/Group.cpp b/anari/Group.cpp
+index 5e9e6a0..d2cda78 100644
+--- a/anari/Group.cpp
++++ b/anari/Group.cpp
+@@ -20,9 +20,9 @@ void Group::commit()
+   m_volumeData = getParamObject<ObjectArray>("volume");
+ 
+   if (m_surfaceData)
+-    m_surfaceData->addCommitObserver(this);
++    m_surfaceData->addChangeObserver(this);
+   if (m_volumeData)
+-    m_volumeData->addCommitObserver(this);
++    m_volumeData->addChangeObserver(this);
+ }
+ 
+ void Group::markCommitted()
+@@ -107,7 +107,7 @@ box3 Group::bounds() const
+ void Group::cleanup()
+ {
+   if (m_surfaceData)
+-    m_surfaceData->removeCommitObserver(this);
++    m_surfaceData->removeChangeObserver(this);
+ }
+ 
+ } // namespace barney_device
+diff --git a/anari/World.cpp b/anari/World.cpp
+index 92a3622..9e35ab2 100644
+--- a/anari/World.cpp
++++ b/anari/World.cpp
+@@ -98,9 +98,9 @@ void World::commit()
+     m_instances.push_back(m_zeroInstance.ptr);
+ 
+   if (m_instanceData)
+-    m_instanceData->addCommitObserver(this);
++    m_instanceData->addChangeObserver(this);
+   if (m_zeroSurfaceData)
+-    m_zeroSurfaceData->addCommitObserver(this);
++    m_zeroSurfaceData->addChangeObserver(this);
+ }
+ 
+ BNModel World::barneyModel() const
+@@ -163,9 +163,9 @@ void World::buildBarneyModel()
+ void World::cleanup()
+ {
+   if (m_instanceData)
+-    m_instanceData->removeCommitObserver(this);
++    m_instanceData->removeChangeObserver(this);
+   if (m_zeroSurfaceData)
+-    m_zeroSurfaceData->removeCommitObserver(this);
++    m_zeroSurfaceData->removeChangeObserver(this);
+   m_instances.clear();
+ }
+ 

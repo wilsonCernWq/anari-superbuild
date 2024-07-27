@@ -87,16 +87,12 @@ cd build\anari\build\Release
 Linux:
 
 ```bash
+export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
+
 cd build/anari/build
 ANARI_LIBRARY=helide ./anariViewer 
-
-# make sure libanari_library_ospray.so has been compiled
-export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
-ANARI_LIBRARY=ospray ./anariViewer 
-
-# make sure libanari_library_barney.so has been compiled
-export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
-ANARI_LIBRARY=barney ./anariViewer 
+ANARI_LIBRARY=ospray ./anariViewer # make sure libanari_library_ospray.so has been compiled
+ANARI_LIBRARY=barney ./anariViewer # make sure libanari_library_barney.so has been compiled
 ```
 
 Windows:
