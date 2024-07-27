@@ -1,0 +1,38 @@
+diff --git a/devices/rtx/gpu/cameraCreateRay.h b/devices/rtx/gpu/cameraCreateRay.h
+index 9289391..6db228e 100644
+--- a/devices/rtx/gpu/cameraCreateRay.h
++++ b/devices/rtx/gpu/cameraCreateRay.h
+@@ -73,7 +73,7 @@ RT_FUNCTION Ray cameraCreateRay(const CameraGPUData *c, vec2 screen, vec2 r)
+ 
+ RT_FUNCTION Ray makePrimaryRay(ScreenSample &ss, bool centerPixel = false)
+ {
+-  const float4 r = curand_uniform4(&ss.rs);
++  const ::float4 r = curand_uniform4(&ss.rs);
+   ss.screen = (centerPixel ? vec2(ss.pixel.x, ss.pixel.y)
+                            : vec2(ss.pixel.x + r.x, ss.pixel.y + r.y))
+       * ss.frameData->fb.invSize;
+diff --git a/devices/rtx/gpu/gpu_math.h b/devices/rtx/gpu/gpu_math.h
+index ede7524..b083510 100644
+--- a/devices/rtx/gpu/gpu_math.h
++++ b/devices/rtx/gpu/gpu_math.h
+@@ -33,6 +33,7 @@
+ 
+ #include "gpu/gpu_decl.h"
+ 
++#define GLM_ENABLE_EXPERIMENTAL
+ #include <glm/ext.hpp>
+ #include <glm/glm.hpp>
+ #include <glm/gtx/component_wise.hpp>
+diff --git a/devices/rtx/scene/volume/space_skipping/UniformGrid.cu b/devices/rtx/scene/volume/space_skipping/UniformGrid.cu
+index b936296..b41a555 100644
+--- a/devices/rtx/scene/volume/space_skipping/UniformGrid.cu
++++ b/devices/rtx/scene/volume/space_skipping/UniformGrid.cu
+@@ -77,7 +77,7 @@ __global__ void computeMaxOpacitiesGPU(float *maxOpacities,
+   float maxOpacity = 0.f;
+   for (int i = lo; i <= hi; ++i) {
+     float tc = (i + .5f) / numColors;
+-    maxOpacity = fmaxf(maxOpacity, tex1D<float4>(colorMap, tc).w);
++    maxOpacity = fmaxf(maxOpacity, tex1D<::float4>(colorMap, tc).w);
+   }
+   maxOpacities[threadID] = maxOpacity;
+ }

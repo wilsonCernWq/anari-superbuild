@@ -12,11 +12,12 @@ On NVIDIA GPU, you need to install CUDA and [OptiX](https://developer.nvidia.com
 
 And export the path to OptiX:
 ```bash
-export OptiX_INSTALL_DIR=""
+export OptiX_INSTALL_DIR="/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
+export CMAKE_PREFIX_PATH="/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
 ```
 ```powershell
 $Env:OptiX_INSTALL_DIR = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
-# $Env:CMAKE_PREFIX_PATH = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
+$Env:CMAKE_PREFIX_PATH = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
 ```
 
 Then you can download BARNEY
