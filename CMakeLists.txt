@@ -103,3 +103,9 @@ if(BUILD_ANARI_SDK)
   # include(dep_anari_visionaray)
   # include(dep_anari_ptc)
 endif()
+
+# output to top-level 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/example)

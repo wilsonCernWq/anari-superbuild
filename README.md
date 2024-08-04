@@ -126,12 +126,12 @@ Path to the file is: `build\anari\src\examples\simple\anariTutorial.cpp`
 
 Then recompile it using:
 ```
-cd build\anari\build
-cmake --build . --config Release --target anariTutorialCpp
+cd build
+cmake --build . --config Release --target demo
 ```
 
 Then run it again
 ```
-.\Release\anariViewer.exe
+.\Release\demo.exe
 ```
 
