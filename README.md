@@ -27,7 +27,7 @@ cd <root-directory>
 ```bash
 git clone --recursive https://github.com/ingowald/barney.git
 ```
-Note that you need to manually replace `*ChangeObserver` with `*ChangeObserver`.
+Note that you need to manually replace `*CommitObserver` with `*ChangeObserver`.
 You can do this using VSCode or any text editor.
 
 ![barney_commit_observer.png](barney_commit_observer.png)
