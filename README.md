@@ -112,4 +112,26 @@ $Env:ANARI_LIBRARY = "ospray"
 # or barney
 $Env:ANARI_LIBRARY = "barney"
 .\anariViewer 
+
+# or visrtx
+$Env:ANARI_LIBRARY = "visrtx"
+.\anariViewer 
 ```
+
+### Tutorial 3: Edit anariTutorialCpp
+
+You can edit `anariTutorialCpp.cpp` to change the visualization.
+
+Path to the file is: `build\anari\src\examples\simple\anariTutorial.cpp`
+
+Then recompile it using:
+```
+cd build\anari\build
+cmake --build . --config Release --target anariTutorialCpp
+```
+
+Then run it again
+```
+.\Release\anariViewer.exe
+```
+
