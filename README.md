@@ -8,33 +8,23 @@ mkdir build
 
 ## Dependencies
 
-On NVIDIA GPU, you need to install CUDA and [OptiX](https://developer.nvidia.com/rtx/ray-tracing/optix) 7+.
+* Python
 
-And export the path to OptiX:
-```bash
-export OptiX_INSTALL_DIR="/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
-export CMAKE_PREFIX_PATH="/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
-```
-```powershell
-$Env:OptiX_INSTALL_DIR = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
-$Env:CMAKE_PREFIX_PATH = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
-```
+* On NVIDIA GPU, you need to install CUDA and [OptiX](https://developer.nvidia.com/rtx/ray-tracing/optix) 7+.
 
-Then you can download BARNEY
-```bash
-cd <root-directory>
-```
-```bash
-git clone --recursive https://github.com/ingowald/barney.git
-```
-Note that you need to manually replace `*CommitObserver` with `*ChangeObserver`.
-You can do this using VSCode or any text editor.
-
-![barney_commit_observer.png](barney_commit_observer.png)
-
+    And export the path to OptiX:
+    ```bash
+    # Linux (Bash)
+    export OptiX_INSTALL_DIR="/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
+    ```
+    ```powershell
+    # Windows (Powershell)
+    $Env:OptiX_INSTALL_DIR = "C:\ProgramData\NVIDIA Corporation\OptiX SDK 7.4.0"
+    ```
 
 ## Build Everything
 
+The work directory is the root directory of this repository.
 ```bash
 cd <root-directory>
 ```
@@ -47,23 +37,23 @@ cd build
 cmake -S . -B build 
 ```
 
-Windows (Powershell or Bash)
-```bash
+Windows (Assume you have Visual Studio 2022 installed, if not, change the generator to the one you have)
+```powershell
 cd build
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 ```
 
-### Actual Build
+### Actual Compilation
 
 For all platforms:
 ```bash
 cmake --build build --config Release --parallel
-# cmake --build build --config Release --parallel --target anari-ospray
-# cmake --build build --config Release --parallel --target anari-barney 
 ```
 
 Outputs are installed into `build/install`.
 
+
+## Tutorials
 
 ### Tutorial 1: anariTutorialCpp
 
@@ -91,8 +81,10 @@ export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/l
 
 cd build/anari/build
 ANARI_LIBRARY=helide ./anariViewer 
-ANARI_LIBRARY=ospray ./anariViewer # make sure libanari_library_ospray.so has been compiled
-ANARI_LIBRARY=barney ./anariViewer # make sure libanari_library_barney.so has been compiled
+# make sure libanari_library_ospray.so has been compiled
+ANARI_LIBRARY=ospray ./anariViewer 
+# make sure libanari_library_barney.so has been compiled
+ANARI_LIBRARY=barney ./anariViewer 
 ```
 
 Windows:

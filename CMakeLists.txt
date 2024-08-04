@@ -24,7 +24,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CONFIGURATION_TYPES})
 ## Establish project ##
 # ------------------------------------------------------------------
 
-project(anari_superbuild)
+project(anari_demo)
 
 include(CheckLanguage)
 check_language(CUDA) # Check if CUDA is available
@@ -43,66 +43,6 @@ include(ExternalProject)
 include(GNUInstallDirs)
 include(ProcessorCount)
 include(CMakeDependentOption)
-
-# ------------------------------------------------------------------
-## Superbuild options ##
-# ------------------------------------------------------------------
-
-## Build options ##
-ProcessorCount(PROCESSOR_COUNT)
-
-if(NOT PROCESSOR_COUNT EQUAL 0)
-  set(BUILD_JOBS ${PROCESSOR_COUNT} CACHE STRING "Number of build jobs '-j <n>'")
-else()
-  set(BUILD_JOBS 4 CACHE STRING "Number of build jobs '-j <n>'")
-endif()
-
-option(ALWAYS_REBUILD "Force every project to always be rebuilt?" OFF)
-
-## Setup top-level variables ##
-if (${CMAKE_VERSION} VERSION_GREATER 3.11.4)
-  set(PARALLEL_JOBS_OPTS -j ${BUILD_JOBS})
-endif()
-
-## Build dependencies ##
-set(DEFAULT_BUILD_COMMAND ${CMAKE_COMMAND} --build . --config ${CMAKE_BUILD_TYPE} ${PARALLEL_JOBS_OPTS})
-
-# ------------------------------------------------------------------
-#
-# ------------------------------------------------------------------
-
-option(BUILD_GLFW "Build glfw from source or use one in existing environment?" ON)
-if(BUILD_GLFW AND NOT BUILD_OPENVKL)
-  include(dep_glfw)
-endif()
-
-option(BUILD_GLAD "Build glad from source or use one in existing environment?" ON)
-if(BUILD_GLAD)
-  include(dep_glad)
-endif()
-
-set(OptiX_INSTALL_DIR "$ENV{OptiX_INSTALL_DIR}")
-# forward slash to back slash
-string(REPLACE "\\" "/" OptiX_INSTALL_DIR "${OptiX_INSTALL_DIR}")
-message(STATUS "OptiX_INSTALL_DIR: ${OptiX_INSTALL_DIR}")
-
-if(CMAKE_CUDA_COMPILER AND (${OptiX_INSTALL_DIR} STREQUAL ""))
-  message(WARNING "CUDA found but OptiX_INSTALL_DIR not set. ANARI-VisRTX and ANARI-Barney might not work.")
-endif()
-
-option(BUILD_ANARI_SDK "Build ANARI SDK from source?" ON)
-if(BUILD_ANARI_SDK)
-  include(dep_anari)
-  include(dep_anari_ospray)
-  if (CMAKE_CUDA_COMPILER)
-    include(dep_anari_barney)
-    include(dep_anari_visrtx)
-  else()
-    message(WARNING "CUDA not found. Skipping ANARI-VisRTX and ANARI-Barney.")
-  endif()
-  # include(dep_anari_visionaray)
-  # include(dep_anari_ptc)
-endif()
 
 # output to top-level 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
