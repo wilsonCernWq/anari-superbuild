@@ -102,3 +102,8 @@ if(BUILD_ANARI_SDK)
   # include(dep_anari_visionaray)
   # include(dep_anari_ptc)
 endif()
+
+option(BUILD_VTKM "Build VTKm" OFF)
+if(BUILD_VTKM)
+  include(dep_vtkm)
+endif()

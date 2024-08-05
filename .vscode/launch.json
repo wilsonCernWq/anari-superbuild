@@ -64,7 +64,7 @@
                 },
                 {
                     "name": "ANARI_LIBRARY",
-                    "value": "helide"
+                    "value": "${input:ANARI_LIBRARY}"
                 }
             ],
             "console": "integratedTerminal"

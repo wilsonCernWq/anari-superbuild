@@ -22,7 +22,8 @@
                     "-S", "${workspaceFolder}/superbuild",
                     "-B", "${workspaceFolder}/build/deps",
                     // NOTE: Change the path to your OptiX SDK installation directory
-                    "-DOptiX_INSTALL_DIR=/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
+                    "-DOptiX_INSTALL_DIR=/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64",
+                    "-DBUILD_VTKM=${input:BUILD_VTKM}"
                 ]
             },
             "problemMatcher": []
@@ -50,6 +51,18 @@
             ],
             "problemMatcher": [],
             "detail": "CMake template configure task"
+        }
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "BUILD_VTKM",
+            "description": "Whether to Build VTK-m (This Could Take a While)",
+            "options": [
+                "OFF",
+                "ON",
+            ],
+            "default": "OFF"
         }
     ]
 }
