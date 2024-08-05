@@ -12,6 +12,7 @@
                     "-S", "${workspaceFolder}/superbuild",
                     "-B", "${workspaceFolder}/build/deps",
                     "-A", "x64",
+                    // NOTE: Change the path to your OptiX SDK installation directory
                     "-DOptiX_INSTALL_DIR='C:/ProgramData/NVIDIA Corporation/OptiX SDK 7.4.0'"
                 ]
             },
@@ -20,6 +21,7 @@
                 "args": [
                     "-S", "${workspaceFolder}/superbuild",
                     "-B", "${workspaceFolder}/build/deps",
+                    // NOTE: Change the path to your OptiX SDK installation directory
                     "-DOptiX_INSTALL_DIR=/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
                 ]
             },
