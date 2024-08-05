@@ -15,25 +15,39 @@
                     "-DOptiX_INSTALL_DIR='C:/ProgramData/NVIDIA Corporation/OptiX SDK 7.4.0'"
                 ]
             },
+            "linux": {
+                "command": "cmake",
+                "args": [
+                    "-S", "${workspaceFolder}/superbuild",
+                    "-B", "${workspaceFolder}/build/deps",
+                    "-DOptiX_INSTALL_DIR=/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64"
+                ]
+            },
             "problemMatcher": []
         },
         {
-            "label": "Superbuild",
+            "label": "Superbuild (build)",
             "type": "shell",
-            "windows": {
-                "command": "cmake",
-                "args": [
-                    "--build", "${workspaceFolder}/build/deps",
-                    "--config", "Release",
-                    "--target", "anari-visrtx",
-                    "--parallel"
-                ]
-            },
-            "dependsOrder": "sequence",
+            "command": "cmake",
+            "args": [
+                "--build", "${workspaceFolder}/build/deps",
+                "--config", "Release",
+                "--parallel"
+            ],
             "dependsOn": [
-                "Superbuild (config)"
+                "Superbuild (config)",
             ],
             "problemMatcher": []
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: configure",
+            "command": "configure", 
+            "dependsOn": [
+                "Superbuild (build)"
+            ],
+            "problemMatcher": [],
+            "detail": "CMake template configure task"
         }
     ]
 }

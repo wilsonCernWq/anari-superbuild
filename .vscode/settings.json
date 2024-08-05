@@ -1,4 +1,9 @@
 {
     "cmake.configureOnEdit": false,
-    "cmake.automaticReconfigure": false
+    "cmake.automaticReconfigure": false,
+    "cmake.configureSettings": {
+        "CMAKE_PREFIX_PATH": [
+            "${workspaceFolder}/build/deps/install"
+        ]
+    }
 }
