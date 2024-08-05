@@ -1,2 +1,3 @@
 build/
+.anari_deps/
 demo_output.png

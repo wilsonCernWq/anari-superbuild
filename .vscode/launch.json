@@ -48,6 +48,40 @@
                 }
             ],
             "console": "integratedTerminal"
+        },
+        {
+            "name": "(Windows) DemoViewer",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/${command:cmake.buildType}/demoViewer.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "${env:PATH};${workspaceFolder}/build/deps/install/bin;${workspaceFolder}/build/deps/install/redist/intel64/vc14"
+                },
+                {
+                    "name": "ANARI_LIBRARY",
+                    "value": "helide"
+                }
+            ],
+            "console": "integratedTerminal"
+        },
+    ],
+    "inputs": [
+        {
+            "type": "pickString",
+            "id": "ANARI_LIBRARY",
+            "description": "ANARI library for rendering",
+            "options": [
+                "helide",
+                "ospray",
+                "barney",
+                "visrtx"
+            ],
+            "default": "helide"
         }
     ]
 }
