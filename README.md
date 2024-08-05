@@ -29,29 +29,47 @@ The work directory is the root directory of this repository.
 cd <root-directory>
 ```
 
-### Generate Build Files
+### Build Dependencies
 
 Linux
 ```bash
 cd build
-cmake -S . -B build 
+cmake -S superbuild -B build/deps
 ```
 
 Windows (Assume you have Visual Studio 2022 installed, if not, change the generator to the one you have)
 ```powershell
 cd build
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake -S superbuild -B build/deps -G "Visual Studio 17 2022" -A x64
 ```
 
-### Actual Compilation
-
-For all platforms:
+Then, for all platforms:
 ```bash
-cmake --build build --config Release --parallel
+cmake --build build/deps --config Release --parallel
 ```
 
 Outputs are installed into `build/install`.
 
+
+### Actual Compilation
+
+Linux
+```bash
+cd build
+cmake -S . -B build -DCMAKE_PREFIX_PATH="build\deps\install"
+```
+
+Windows (Assume you have Visual Studio 2022 installed, if not, change the generator to the one you have)
+```powershell
+cd build
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="build\deps\install"
+```
+
+
+Then, for all platforms:
+```bash
+cmake --build build --config Release --parallel
+```
 
 ## Tutorials
 
@@ -59,14 +77,12 @@ Outputs are installed into `build/install`.
 
 Linux:
 ```bash
-cd build/anari/build
-./anariTutorialCpp
+./build/deps/anari/build/anariTutorialCpp
 ```
 
 Windows:
 ```powershell
-cd build\anari\build\Release
-.\anariTutorialCpp.exe
+.\build\deps\anari\build\Release\anariTutorialCpp.exe
 ```
 
 ![tutorial_cpp.png](tutorial_cpp.png)
@@ -77,53 +93,53 @@ cd build\anari\build\Release
 Linux:
 
 ```bash
-export LD_LIBRARY_PATH=/mnt/scratch/fast0/qadwu/anari-superbuild/build/install/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${PWD}/build/deps/install/lib:$LD_LIBRARY_PATH
 
-cd build/anari/build
-ANARI_LIBRARY=helide ./anariViewer 
-# make sure libanari_library_ospray.so has been compiled
-ANARI_LIBRARY=ospray ./anariViewer 
-# make sure libanari_library_barney.so has been compiled
-ANARI_LIBRARY=barney ./anariViewer 
+cd 
+ANARI_LIBRARY=helide ./build/deps/anari/build/anariViewer 
+# require libanari_library_ospray.so
+ANARI_LIBRARY=ospray ./build/deps/anari/build/anariViewer 
+# require libanari_library_barney.so
+ANARI_LIBRARY=barney ./build/deps/anari/build/anariViewer 
+# require libanari_library_visrtx.so
+ANARI_LIBRARY=visrtx ./build/deps/anari/build/anariViewer 
 ```
 
 Windows:
 
 ```powershell
-$Env:PATH += ";E:\Projects\research\anari-superbuild\build\install\bin"
-$Env:PATH += ";E:\Projects\research\anari-superbuild\build\install\redist\intel64\vc14"
+$Env:PATH += ";$PWD\build\deps\install\bin"
+$Env:PATH += ";$PWD\build\deps\install\redist\intel64\vc14"
 
-cd build\anari\build\Release
 $Env:ANARI_LIBRARY = "helide"
-.\anariViewer 
+.\build\deps\anari\build\Release\anariViewer 
 
 # or ospray
 $Env:ANARI_LIBRARY = "ospray"
-.\anariViewer 
+.\build\deps\anari\build\Release\anariViewer 
 
 # or barney
 $Env:ANARI_LIBRARY = "barney"
-.\anariViewer 
+.\build\deps\anari\build\Release\anariViewer 
 
 # or visrtx
 $Env:ANARI_LIBRARY = "visrtx"
-.\anariViewer 
+.\build\deps\anari\build\Release\anariViewer 
 ```
 
 ### Tutorial 3: Edit anariTutorialCpp
 
 You can edit `anariTutorialCpp.cpp` to change the visualization.
 
-Path to the file is: `build\anari\src\examples\simple\anariTutorial.cpp`
+Path to the file is: `example\anariTutorial.cpp`
 
 Then recompile it using:
-```
+```bash
 cd build
-cmake --build . --config Release --target demo
+cmake --build build --config Release
 ```
 
 Then run it again
+```powershell
+.\build\Release\demo.exe # Windows
 ```
-.\Release\demo.exe
-```
-
