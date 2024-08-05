@@ -12,6 +12,12 @@
 // stb_image
 #include "stb_image_write.h"
 
+#include <vtkm/io/VTKDataSetReader.h>
+#include <vtkm/cont/CellSetSingleType.h>
+#include <vtkm/cont/ArrayCopy.h>
+
+#include "PolyLineDataReader.h"
+
 using uvec2 = std::array<unsigned int, 2>;
 using uvec3 = std::array<unsigned int, 3>;
 using vec3 = std::array<float, 3>;
@@ -67,9 +73,14 @@ int main(int argc, const char **argv)
   uvec2 imgSize = {1024 /*width*/, 768 /*height*/};
 
   // camera
-  vec3 cam_pos = {0.f, 0.f, 0.f};
-  vec3 cam_up = {0.f, 1.f, 0.f};
-  vec3 cam_view = {0.1f, 0.f, 1.f};
+  vec3 cam_pos = {6.9f, 38.3f, 250.f};
+  vec3 cam_focal = {1.086f, 19.150f, 103.543f};
+  vec3 cam_up = {-0.221713f, -0.97421f, 0.0419261f};
+  vec3 cam_view = {
+    cam_focal[0] - cam_pos[0],
+    cam_focal[1] - cam_pos[1],
+    cam_focal[2] - cam_pos[2],
+  };
 
   // triangle mesh array
   vec3 vertex[] = {{-1.0f, -1.0f, 3.0f},
@@ -81,13 +92,24 @@ int main(int argc, const char **argv)
       {0.8f, 0.8f, 0.8f, 1.0f},
       {0.8f, 0.8f, 0.8f, 1.0f},
       {0.5f, 0.0f, 0.5f, 1.0f}};
-  // uvec3 index[] = {{0, 1, 2}, {1, 2, 3}};
+  uvec3 index[] = {{0, 1, 2}, {1, 2, 3}};
+
+  vtkm::io::PolyLineDataReader reader(argv[1]);
+  auto ds = reader.ReadDataSet();
+  ds.PrintSummary(std::cout);
+  std::cout << std::endl;
+
+  auto coords = ds.GetCoordinateSystem().GetData().AsArrayHandle<vtkm::cont::ArrayHandle<vtkm::Vec3f_32>>();
+  auto cells = ds.GetCellSet().AsCellSet<vtkm::cont::CellSetExplicit<>>();
+  auto conn = cells.GetConnectivityArray(vtkm::TopologyElementTagCell(), vtkm::TopologyElementTagPoint());
+
+  auto offsets = cells.GetOffsetsArray(vtkm::TopologyElementTagCell(), vtkm::TopologyElementTagPoint());
+  vtkm::cont::ArrayHandle<vtkm::UInt32> primIndex;
+  vtkm::cont::ArrayCopyShallowIfPossible(offsets, primIndex);
 
   printf("initialize ANARI...");
-  anari::Library lib = anari::loadLibrary("helide", statusFunc);
-
-  anari::Extensions extensions =
-      anari::extension::getDeviceExtensionStruct(lib, "default");
+  anari::Library lib = anari::loadLibrary("ospray", statusFunc);
+  anari::Extensions extensions = anari::extension::getDeviceExtensionStruct(lib, "default");
 
   if (!extensions.ANARI_KHR_GEOMETRY_TRIANGLE)
     printf("WARNING: device doesn't support ANARI_KHR_GEOMETRY_TRIANGLE\n");
@@ -107,13 +129,11 @@ int main(int argc, const char **argv)
 
   // create and setup camera
   auto camera = anari::newObject<anari::Camera>(d, "perspective");
-  anari::setParameter(
-      d, camera, "aspect", (float)imgSize[0] / (float)imgSize[1]);
+  anari::setParameter(d, camera, "aspect", (float)imgSize[0] / (float)imgSize[1]);
   anari::setParameter(d, camera, "position", cam_pos);
   anari::setParameter(d, camera, "direction", cam_view);
   anari::setParameter(d, camera, "up", cam_up);
-  anari::commitParameters(
-      d, camera); // commit objects to indicate setting parameters is done
+  anari::commitParameters(d, camera); // commit objects to indicate setting parameters is done
 
   printf("done!\n");
   printf("setting up scene...");
@@ -123,13 +143,25 @@ int main(int argc, const char **argv)
 
   // create and setup surface and mesh
   auto mesh = anari::newObject<anari::Geometry>(d, "curve");
-  anari::setParameterArray1D(d, mesh, "vertex.position", vertex, 4);
-  anari::setParameterArray1D(d, mesh, "vertex.color", color, 4);
-  anari::setParameter(d, mesh, "radius", 0.1f);
+  {
+    vtkm::cont::Token token;
+    auto* ptr = (vec3*)coords.GetBuffers()[0].ReadPointerHost(token);
+    anari::setParameterArray1D(d, mesh, "vertex.position", ptr, coords.GetNumberOfValues());
+  }
+  {
+    vtkm::cont::Token token;
+    auto* ptr = (uint32_t*)primIndex.GetBuffers()[0].ReadPointerHost(token);
+    anari::setParameterArray1D(d, mesh, "primitive.index", ptr, primIndex.GetNumberOfValues());
+  }
+
+  // anari::setParameterArray1D(d, mesh, "vertex.color", color, 4);
+
+  anari::setParameter(d, mesh, "radius", 0.5f);
   anari::commitParameters(d, mesh);
 
   auto mat = anari::newObject<anari::Material>(d, "matte");
-  anari::setParameter(d, mat, "color", "color");
+  // anari::setParameter(d, mat, "color", "color");
+  anari::setParameter(d, mat, "color", vec3{0.9f, 0.9f, 0.9f});
   anari::commitParameters(d, mat);
 
   // put the mesh into a surface
@@ -143,6 +175,13 @@ int main(int argc, const char **argv)
   anari::setParameterArray1D(d, world, "surface", &surface, 1);
   anari::setParameter(d, world, "id", 3u);
   anari::release(d, surface);
+
+  anari::Light light = anari::newObject<anari::Light>(d, "directional");
+  anari::setParameter(d, light, "direction", vec3{0.f, -0.5f, 1.f});
+  anari::commitParameters(d, light);
+
+  anari::setAndReleaseParameter(d, world, "light", anari::newArray1D(d, &light));
+  anari::release(d, light);
 
   anari::commitParameters(d, world);
 
@@ -195,7 +234,8 @@ int main(int argc, const char **argv)
   printf("rendering frame to firstFrame.png...\n");
 
   // render one frame
-  anari::render(d, frame);
+  for (int i = 0; i < 32; i++)
+    anari::render(d, frame);
   anari::wait(d, frame);
 
   // access frame and write its content as PNG file
@@ -209,28 +249,6 @@ int main(int argc, const char **argv)
   anari::unmap(d, frame, "channel.color");
 
   printf("...done!\n");
-
-  // Check center pixel id buffers
-  auto fbPrimId = anari::map<uint32_t>(d, frame, "channel.primitiveId");
-  auto fbObjId = anari::map<uint32_t>(d, frame, "channel.objectId");
-  auto fbInstId = anari::map<uint32_t>(d, frame, "channel.instanceId");
-
-  uvec2 queryPixel = {imgSize[0] / 2, imgSize[1] / 2};
-
-  printf("checking id buffers @ [%u, %u]:\n", queryPixel[0], queryPixel[1]);
-
-  if (fbPrimId.pixelType == ANARI_UINT32) {
-    printf("    primId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbPrimId.data));
-  }
-  if (fbObjId.pixelType == ANARI_UINT32) {
-    printf("     objId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbObjId.data));
-  }
-  if (fbPrimId.pixelType == ANARI_UINT32) {
-    printf("    instId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbInstId.data));
-  }
 
   printf("\ncleaning up objects...");
 

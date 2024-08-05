@@ -9,7 +9,9 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/demo",
-            "args": [],
+            "args": [
+                "/media/data/qadwu/BrainFiber_ExampleData/BrainFiber_ExampleData/FiberTracts/DTI_processed_ACT_5TTwmmask_seedgmwmi_0.5M_sift0.1M.vtk"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [

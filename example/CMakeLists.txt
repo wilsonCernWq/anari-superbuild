@@ -3,8 +3,16 @@
 
 find_package(anari REQUIRED COMPONENTS viewer)
 
-add_executable(demo anariTutorial.cpp stb_image_write.c stb_image.c)
-target_link_libraries(demo PRIVATE anari::anari)
+find_package(VTKm REQUIRED)
+
+add_executable(demo 
+    anariTutorial.cpp stb_image_write.c stb_image.c
+    PolyLineDataReader.cxx    
+)
+target_link_libraries(demo PRIVATE anari::anari
+    vtkm::cont
+    vtkm::io 
+)
 target_include_directories(demo PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 add_executable(demoViewer demoViewer.cpp)

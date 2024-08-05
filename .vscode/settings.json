@@ -5,5 +5,8 @@
         "CMAKE_PREFIX_PATH": [
             "${workspaceFolder}/build/deps/install"
         ]
+    },
+    "files.associations": {
+        "array": "cpp"
     }
 }
