@@ -31,6 +31,7 @@ ExternalProject_Add(${COMPONENT_NAME}
     -DCMAKE_INSTALL_PREFIX=${COMPONENT_PATH}
     -DBARNEY_BUILD_ANARI=ON
     -DOWL_BUILD_SAMPLES=OFF
+    -DOptiX_INSTALL_DIR=${OptiX_INSTALL_DIR}
 )
 
 ExternalProject_Add_StepDependencies(anari-barney configure anari)
