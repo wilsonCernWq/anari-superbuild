@@ -8,7 +8,7 @@ list(APPEND CMAKE_PREFIX_PATH ${COMPONENT_PATH})
 set(COMPONENT_NAME anari-barney)
 
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${COMPONENT_NAME}/src)
-  set(PATCH_COMMAND "${GIT_EXECUTABLE};--git-dir=;apply;${CMAKE_CURRENT_SOURCE_DIR}/visrtx_v0.9.0.patch")
+  set(PATCH_COMMAND "${GIT_EXECUTABLE};--git-dir=;apply;${CMAKE_CURRENT_SOURCE_DIR}/barney_531ede1a.patch")
 else()
   set(PATCH_COMMAND "")
 endif()
