@@ -130,7 +130,7 @@ int main(int argc, const char **argv)
   }
 
   // image size
-  uvec2 imgSize = {1400 /*width*/, 2000 /*height*/};
+  uvec2 img_size = {1400 /*width*/, 2000 /*height*/};
 
   // camera
   vec3 cam_pos = {6.9f, 30.3f, 200.f};
@@ -164,7 +164,7 @@ int main(int argc, const char **argv)
 
   // create and setup camera
   auto camera = anari::newObject<anari::Camera>(d, "perspective");
-  anari::setParameter(d, camera, "aspect", (float)imgSize[0] / (float)imgSize[1]);
+  anari::setParameter(d, camera, "aspect", (float)img_size[0] / (float)img_size[1]);
   anari::setParameter(d, camera, "position", cam_pos);
   anari::setParameter(d, camera, "direction", cam_view);
   anari::setParameter(d, camera, "up", cam_up);
@@ -250,7 +250,7 @@ int main(int argc, const char **argv)
 
   // create and setup frame
   auto frame = anari::newObject<anari::Frame>(d);
-  anari::setParameter(d, frame, "size", imgSize);
+  anari::setParameter(d, frame, "size", img_size);
   anari::setParameter(d, frame, "channel.color", ANARI_UFIXED8_RGBA_SRGB);
   anari::setParameter(d, frame, "channel.primitiveId", ANARI_UINT32);
   anari::setParameter(d, frame, "channel.objectId", ANARI_UINT32);
