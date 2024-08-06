@@ -88,6 +88,17 @@ Windows:
 ![tutorial_cpp.png](tutorial_cpp.png)
 
 
+
+### Tutorial 1.1: demoFiberTracks
+
+Linux:
+```bash
+./build/demoFiberTracks BrainFiber_ExampleData/FiberTracts/DTI_processed_ACT_5TTwmmask_seedgmwmi_0.5M_sift0.1M.vtk
+```
+![demo_output.png](demo_output.png)
+
+
+
 ### Tutorial 2: anariViewer
 
 Linux:

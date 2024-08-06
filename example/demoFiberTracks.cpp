@@ -80,31 +80,32 @@ int main(int argc, const char **argv)
 
   auto coords = ds.GetCoordinateSystem().GetData().AsArrayHandle<vtkm::cont::ArrayHandle<vtkm::Vec3f_32>>();
   auto curves = ds.GetCellSet().AsCellSet<vtkm::cont::CellSetExplicit<>>();
-
-  vtkm::cont::ArrayHandle<vtkm::UInt32> curve_offsets;
-  vtkm::cont::ArrayCopyShallowIfPossible(curves.GetOffsetsArray(vtkm::TopologyElementTagCell(), vtkm::TopologyElementTagPoint()), curve_offsets);
+  auto curve_offsets = curves.GetOffsetsArray(vtkm::TopologyElementTagCell(), vtkm::TopologyElementTagPoint());
   auto curve_offsets_reader = curve_offsets.ReadPortal();
 
-  std::vector<uint32_t> curve_indices;
+  uint32_t curve_length_max = 0;
+  uint32_t curve_length_min = std::numeric_limits<uint32_t>::max();
+  std::vector<uint32_t> curve_lengths(curve_offsets.GetNumberOfValues()-1);
+  // Curves are defined by a sequence of segments. 
+  // The i-th segment is defined by two points: vertex[prim[i]], vertex[prim[i]+1].
+  // Thus if a curve has n+1 vertices, it has n segments (aka n primitives).
+  std::vector<uint32_t> segment_indices;
   for (int i = 1; i < curve_offsets.GetNumberOfValues(); i++) {
     auto offset_curr = curve_offsets_reader.Get(i - 1);
     auto offset_next = curve_offsets_reader.Get(i);
     auto num_segments = offset_next - offset_curr - 1;
-    for (int j = 0; j < num_segments; j++)
-      curve_indices.push_back(offset_curr+j);
-  }
-
-  std::vector<uint32_t> curve_lengths;
-  curve_lengths.resize(curve_offsets.GetNumberOfValues()-1);
-  uint32_t curve_length_max = 0;
-  for (int i = 1; i < curve_offsets.GetNumberOfValues(); i++) {
-    auto offset_curr = curve_offsets_reader.Get(i - 1);
-    auto offset_next = curve_offsets_reader.Get(i);
     curve_lengths[i-1] = offset_next - offset_curr;
     curve_length_max = std::max(curve_length_max, curve_lengths[i-1]);
+    curve_length_min = std::min(curve_length_min, curve_lengths[i-1]);
+    for (int j = 0; j < num_segments; j++) {
+      segment_indices.push_back(offset_curr+j);
+    }
   }
+  segment_indices.shrink_to_fit();
   std::cout << "max length: " << curve_length_max << std::endl;
+  std::cout << "min length: " << curve_length_min << std::endl;
 
+  // Color Mapping //
   vtkm::cont::ColorTable color_table(vtkm::cont::ColorTable::Preset::CoolToWarm);
   color_table.SetColorSpace(vtkm::ColorSpace::Diverging);
 
@@ -120,7 +121,7 @@ int main(int argc, const char **argv)
     if (i == end) {
       primID++;
     }
-    auto v = curve_lengths[primID] / (float)curve_length_max;
+    auto v = (curve_lengths[primID] - curve_length_min) / (float)(curve_length_max - curve_length_min);
     auto c = color_table_portal.Get(v * color_table_samples.NumberOfSamples);
     vertex_colors[i] = {
       c[0] / 255.f,
@@ -133,7 +134,7 @@ int main(int argc, const char **argv)
   uvec2 img_size = {1400 /*width*/, 2000 /*height*/};
 
   // camera
-  vec3 cam_pos = {6.9f, 30.3f, 200.f};
+  vec3 cam_pos = {0.0f, 19.150f, 200.f};
   vec3 cam_focal = {1.086f, 19.150f, 103.543f};
   vec3 cam_up = {-0.221713f, -0.97421f, 0.0419261f};
   vec3 cam_view = {
@@ -143,7 +144,7 @@ int main(int argc, const char **argv)
   };
 
   printf("initialize ANARI...");
-  anari::Library lib = anari::loadLibrary("helide", statusFunc);
+  anari::Library lib = anari::loadLibrary("visrtx", statusFunc);
   anari::Extensions extensions = anari::extension::getDeviceExtensionStruct(lib, "default");
 
   if (!extensions.ANARI_KHR_GEOMETRY_TRIANGLE)
@@ -183,14 +184,8 @@ int main(int argc, const char **argv)
     auto* ptr = (vec3*)coords.GetBuffers()[0].ReadPointerHost(token);
     anari::setParameterArray1D(d, mesh, "vertex.position", ptr, coords.GetNumberOfValues());
   }
-  // {
-  //   vtkm::cont::Token token;
-  //   auto* ptr = (uint32_t*)curve_offsets.GetBuffers()[0].ReadPointerHost(token);
-  //   anari::setParameterArray1D(d, mesh, "primitive.index", ptr, 2);
-  // }
-  anari::setParameterArray1D(d, mesh, "primitive.index", curve_indices.data(), curve_indices.size());
-
   anari::setParameterArray1D(d, mesh, "vertex.color", vertex_colors.data(), vertex_colors.size());
+  anari::setParameterArray1D(d, mesh, "primitive.index", segment_indices.data(), segment_indices.size());
 
   anari::setParameter(d, mesh, "radius", 0.25f);
   anari::commitParameters(d, mesh);
@@ -270,7 +265,7 @@ int main(int argc, const char **argv)
   printf("rendering frame to firstFrame.png...\n");
 
   // render one frame
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < 32; i++)
     anari::render(d, frame);
   anari::wait(d, frame);
 

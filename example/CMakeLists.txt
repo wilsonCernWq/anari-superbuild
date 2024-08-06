@@ -8,12 +8,8 @@ find_package(VTKm REQUIRED)
 # Example 1
 add_executable(demo 
     anariTutorial.cpp stb_image_write.c stb_image.c
-    PolyLineDataReader.cxx    
 )
-target_link_libraries(demo PRIVATE anari::anari
-    vtkm::cont
-    vtkm::io 
-)
+target_link_libraries(demo PRIVATE anari::anari)
 target_include_directories(demo PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 # Example 2
