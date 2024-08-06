@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Demo",
+            "name": "(gdb) demoFiberTracks",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/demo",
+            "program": "${workspaceFolder}/build/demoFiberTracks",
             "args": [
                 "/media/data/qadwu/BrainFiber_ExampleData/BrainFiber_ExampleData/FiberTracts/DTI_processed_ACT_5TTwmmask_seedgmwmi_0.5M_sift0.1M.vtk"
             ],

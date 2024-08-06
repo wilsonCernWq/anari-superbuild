@@ -312,7 +312,7 @@ void PolyLineDataReader::Read()
     this->DataSet.SetCellSet(cellSet);
   }
 
-  this->DataSet.PrintSummary(std::cout);
+  // this->DataSet.PrintSummary(std::cout);
 
   // Read points and cell attributes
   this->ReadAttributes();

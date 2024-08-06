@@ -12,6 +12,14 @@
 // stb_image
 #include "stb_image_write.h"
 
+#include <vtkm/io/VTKDataSetReader.h>
+#include <vtkm/cont/CellSetSingleType.h>
+#include <vtkm/cont/ArrayCopy.h>
+#include <vtkm/cont/ColorTable.h>
+#include <vtkm/cont/ColorTableSamples.h>
+
+#include "PolyLineDataReader.h"
+
 using uvec2 = std::array<unsigned int, 2>;
 using uvec3 = std::array<unsigned int, 3>;
 using vec3 = std::array<float, 3>;
@@ -63,31 +71,80 @@ int main(int argc, const char **argv)
   (void)argv;
   stbi_flip_vertically_on_write(1);
 
+  // load dataset
+  printf("loading ... %s", argv[1]);
+  vtkm::io::PolyLineDataReader reader(argv[1]);
+  auto ds = reader.ReadDataSet();
+  ds.PrintSummary(std::cout);
+  std::cout << std::endl;
+
+  auto coords = ds.GetCoordinateSystem().GetData().AsArrayHandle<vtkm::cont::ArrayHandle<vtkm::Vec3f_32>>();
+  auto curves = ds.GetCellSet().AsCellSet<vtkm::cont::CellSetExplicit<>>();
+
+  vtkm::cont::ArrayHandle<vtkm::UInt32> curve_offsets;
+  vtkm::cont::ArrayCopyShallowIfPossible(curves.GetOffsetsArray(vtkm::TopologyElementTagCell(), vtkm::TopologyElementTagPoint()), curve_offsets);
+  auto curve_offsets_reader = curve_offsets.ReadPortal();
+
+  std::vector<uint32_t> curve_indices;
+  for (int i = 1; i < curve_offsets.GetNumberOfValues(); i++) {
+    auto offset_curr = curve_offsets_reader.Get(i - 1);
+    auto offset_next = curve_offsets_reader.Get(i);
+    auto num_segments = offset_next - offset_curr - 1;
+    for (int j = 0; j < num_segments; j++)
+      curve_indices.push_back(offset_curr+j);
+  }
+
+  std::vector<uint32_t> curve_lengths;
+  curve_lengths.resize(curve_offsets.GetNumberOfValues()-1);
+  uint32_t curve_length_max = 0;
+  for (int i = 1; i < curve_offsets.GetNumberOfValues(); i++) {
+    auto offset_curr = curve_offsets_reader.Get(i - 1);
+    auto offset_next = curve_offsets_reader.Get(i);
+    curve_lengths[i-1] = offset_next - offset_curr;
+    curve_length_max = std::max(curve_length_max, curve_lengths[i-1]);
+  }
+  std::cout << "max length: " << curve_length_max << std::endl;
+
+  vtkm::cont::ColorTable color_table(vtkm::cont::ColorTable::Preset::CoolToWarm);
+  color_table.SetColorSpace(vtkm::ColorSpace::Diverging);
+
+  vtkm::cont::ColorTableSamplesRGB color_table_samples;
+  color_table.Sample(256, color_table_samples);
+  auto color_table_portal = color_table_samples.Samples.ReadPortal();
+
+  std::vector<vec3> vertex_colors;
+  vertex_colors.resize(coords.GetNumberOfValues());
+  int primID = 0;
+  for (int i = 0; i < coords.GetNumberOfValues(); i++) {
+    auto end = curve_offsets_reader.Get(primID+1);
+    if (i == end) {
+      primID++;
+    }
+    auto v = curve_lengths[primID] / (float)curve_length_max;
+    auto c = color_table_portal.Get(v * color_table_samples.NumberOfSamples);
+    vertex_colors[i] = {
+      c[0] / 255.f,
+      c[1] / 255.f,
+      c[2] / 255.f
+    };
+  }
+
   // image size
-  uvec2 imgSize = {1024 /*width*/, 768 /*height*/};
+  uvec2 imgSize = {1400 /*width*/, 2000 /*height*/};
 
   // camera
-  vec3 cam_pos = {0.f, 0.f, 0.f};
-  vec3 cam_up = {0.f, 1.f, 0.f};
-  vec3 cam_view = {0.1f, 0.f, 1.f};
-
-  // triangle mesh array
-  vec3 vertex[] = {{-1.0f, -1.0f, 3.0f},
-      {-1.0f, 1.0f, 3.0f},
-      {1.0f, -1.0f, 3.0f},
-      {0.1f, 0.1f, 0.3f}
-      };
-  vec4 color[] = {{0.9f, 0.5f, 0.5f, 1.0f},
-      {0.8f, 0.8f, 0.8f, 1.0f},
-      {0.8f, 0.8f, 0.8f, 1.0f},
-      {0.5f, 0.0f, 0.5f, 1.0f}};
-  // uvec3 index[] = {{0, 1, 2}, {1, 2, 3}};
+  vec3 cam_pos = {6.9f, 30.3f, 200.f};
+  vec3 cam_focal = {1.086f, 19.150f, 103.543f};
+  vec3 cam_up = {-0.221713f, -0.97421f, 0.0419261f};
+  vec3 cam_view = {
+    cam_focal[0] - cam_pos[0],
+    cam_focal[1] - cam_pos[1],
+    cam_focal[2] - cam_pos[2],
+  };
 
   printf("initialize ANARI...");
   anari::Library lib = anari::loadLibrary("helide", statusFunc);
-
-  anari::Extensions extensions =
-      anari::extension::getDeviceExtensionStruct(lib, "default");
+  anari::Extensions extensions = anari::extension::getDeviceExtensionStruct(lib, "default");
 
   if (!extensions.ANARI_KHR_GEOMETRY_TRIANGLE)
     printf("WARNING: device doesn't support ANARI_KHR_GEOMETRY_TRIANGLE\n");
@@ -121,13 +178,26 @@ int main(int argc, const char **argv)
 
   // create and setup surface and mesh
   auto mesh = anari::newObject<anari::Geometry>(d, "curve");
-  anari::setParameterArray1D(d, mesh, "vertex.position", vertex, 4);
-  anari::setParameterArray1D(d, mesh, "vertex.color", color, 4);
-  anari::setParameter(d, mesh, "radius", 0.1f);
+  {
+    vtkm::cont::Token token;
+    auto* ptr = (vec3*)coords.GetBuffers()[0].ReadPointerHost(token);
+    anari::setParameterArray1D(d, mesh, "vertex.position", ptr, coords.GetNumberOfValues());
+  }
+  // {
+  //   vtkm::cont::Token token;
+  //   auto* ptr = (uint32_t*)curve_offsets.GetBuffers()[0].ReadPointerHost(token);
+  //   anari::setParameterArray1D(d, mesh, "primitive.index", ptr, 2);
+  // }
+  anari::setParameterArray1D(d, mesh, "primitive.index", curve_indices.data(), curve_indices.size());
+
+  anari::setParameterArray1D(d, mesh, "vertex.color", vertex_colors.data(), vertex_colors.size());
+
+  anari::setParameter(d, mesh, "radius", 0.25f);
   anari::commitParameters(d, mesh);
 
   auto mat = anari::newObject<anari::Material>(d, "matte");
   anari::setParameter(d, mat, "color", "color");
+  // anari::setParameter(d, mat, "color", vec3{0.9f, 0.9f, 0.9f});
   anari::commitParameters(d, mat);
 
   // put the mesh into a surface
@@ -141,6 +211,13 @@ int main(int argc, const char **argv)
   anari::setParameterArray1D(d, world, "surface", &surface, 1);
   anari::setParameter(d, world, "id", 3u);
   anari::release(d, surface);
+
+  anari::Light light = anari::newObject<anari::Light>(d, "directional");
+  anari::setParameter(d, light, "direction", vec3{0.f, -0.5f, 1.f});
+  anari::commitParameters(d, light);
+
+  anari::setAndReleaseParameter(d, world, "light", anari::newArray1D(d, &light));
+  anari::release(d, light);
 
   anari::commitParameters(d, world);
 
@@ -193,7 +270,8 @@ int main(int argc, const char **argv)
   printf("rendering frame to firstFrame.png...\n");
 
   // render one frame
-  anari::render(d, frame);
+  for (int i = 0; i < 1; i++)
+    anari::render(d, frame);
   anari::wait(d, frame);
 
   // access frame and write its content as PNG file
@@ -207,28 +285,6 @@ int main(int argc, const char **argv)
   anari::unmap(d, frame, "channel.color");
 
   printf("...done!\n");
-
-  // Check center pixel id buffers
-  auto fbPrimId = anari::map<uint32_t>(d, frame, "channel.primitiveId");
-  auto fbObjId = anari::map<uint32_t>(d, frame, "channel.objectId");
-  auto fbInstId = anari::map<uint32_t>(d, frame, "channel.instanceId");
-
-  uvec2 queryPixel = {imgSize[0] / 2, imgSize[1] / 2};
-
-  printf("checking id buffers @ [%u, %u]:\n", queryPixel[0], queryPixel[1]);
-
-  if (fbPrimId.pixelType == ANARI_UINT32) {
-    printf("    primId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbPrimId.data));
-  }
-  if (fbObjId.pixelType == ANARI_UINT32) {
-    printf("     objId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbObjId.data));
-  }
-  if (fbPrimId.pixelType == ANARI_UINT32) {
-    printf("    instId: %u\n",
-        getPixelValue(queryPixel, imgSize[0], fbInstId.data));
-  }
 
   printf("\ncleaning up objects...");
 
