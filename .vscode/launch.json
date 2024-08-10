@@ -39,10 +39,8 @@
             "name": "(Windows) Demo",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/${command:cmake.buildType}/demoFiberTracks.exe",
-            "args": [
-                "H:\\fibertracks.vtk"
-            ],
+            "program": "${workspaceFolder}/build/${command:cmake.buildType}/demo.exe",
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
