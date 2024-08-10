@@ -121,8 +121,9 @@ int main(int argc, const char **argv)
     if (i == end) {
       primID++;
     }
-    auto v = (curve_lengths[primID] - curve_length_min) / (float)(curve_length_max - curve_length_min);
-    auto c = color_table_portal.Get(v * color_table_samples.NumberOfSamples);
+    int v = 2.5 * (curve_lengths[primID] - curve_length_min) / (float)(curve_length_max - curve_length_min) 
+      * color_table_samples.NumberOfSamples;
+    auto c = color_table_portal.Get(std::min(v, color_table_samples.NumberOfSamples-1));
     vertex_colors[i] = {
       c[0] / 255.f,
       c[1] / 255.f,
