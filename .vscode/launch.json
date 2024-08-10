@@ -39,14 +39,16 @@
             "name": "(Windows) Demo",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/${command:cmake.buildType}/demo.exe",
-            "args": [],
+            "program": "${workspaceFolder}/build/${command:cmake.buildType}/demoFiberTracks.exe",
+            "args": [
+                "H:\\fibertracks.vtk"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
                 {
                     "name": "PATH",
-                    "value": "${env:PATH};${workspaceFolder}/build/deps/install/bin;${workspaceFolder}/build/deps/install/redist/intel64/vc14"
+                    "value": "${workspaceFolder}/build/deps/install/bin;${env:PATH};${env:PATH};${workspaceFolder}/build/deps/install/bin;${workspaceFolder}/build/deps/install/redist/intel64/vc14"
                 }
             ],
             "console": "integratedTerminal"
@@ -62,7 +64,7 @@
             "environment": [
                 {
                     "name": "PATH",
-                    "value": "${env:PATH};${workspaceFolder}/build/deps/install/bin;${workspaceFolder}/build/deps/install/redist/intel64/vc14"
+                    "value": "${workspaceFolder}/build/deps/install/bin;${env:PATH};${workspaceFolder}/build/deps/install/bin;${workspaceFolder}/build/deps/install/redist/intel64/vc14"
                 },
                 {
                     "name": "ANARI_LIBRARY",

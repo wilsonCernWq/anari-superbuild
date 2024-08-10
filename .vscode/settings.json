@@ -7,6 +7,7 @@
         ]
     },
     "files.associations": {
+        "*.json": "jsonc",
         "array": "cpp",
         "any": "cpp",
         "atomic": "cpp",
@@ -77,6 +78,7 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "xstring": "cpp"
     }
 }
