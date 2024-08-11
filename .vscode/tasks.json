@@ -15,7 +15,7 @@
                     // NOTE: Change the path to your OptiX SDK installation directory
                     "-DOptiX_INSTALL_DIR='C:/ProgramData/NVIDIA Corporation/OptiX SDK 7.4.0'",
                     "-DBUILD_VTKM=${input:BUILD_VTKM}",
-                    "-DCMAKE_BUILD_TYPE=Debug"
+                    "-DCMAKE_BUILD_TYPE=${input:CMAKE_BUILD_TYPE}"
                 ]
             },
             "linux": {
@@ -26,7 +26,7 @@
                     // NOTE: Change the path to your OptiX SDK installation directory
                     "-DOptiX_INSTALL_DIR=/media/data/qadwu/Software/NVIDIA-OptiX-SDK-7.4.0-linux64-x86_64",
                     "-DBUILD_VTKM=${input:BUILD_VTKM}",
-                    "-DCMAKE_BUILD_TYPE=Debug"
+                    "-DCMAKE_BUILD_TYPE=${input:CMAKE_BUILD_TYPE}"
                 ]
             },
             "problemMatcher": []
@@ -37,7 +37,7 @@
             "command": "cmake",
             "args": [
                 "--build", "${workspaceFolder}/build/deps",
-                "--config", "Debug",
+                "--config", "${input:CMAKE_BUILD_TYPE}",
                 "--parallel"
             ],
             "dependsOn": [
@@ -66,6 +66,16 @@
                 "ON",
             ],
             "default": "OFF"
+        },
+        {
+            "type": "pickString",
+            "id": "CMAKE_BUILD_TYPE",
+            "description": "CMAKE_BUILD_TYPE",
+            "options": [
+                "Debug",
+                "Release",
+            ],
+            "default": "Debug"
         }
     ]
 }
