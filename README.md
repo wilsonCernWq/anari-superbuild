@@ -33,14 +33,12 @@ cd <root-directory>
 
 Linux
 ```bash
-cd build
-cmake -S superbuild -B build/deps
+cmake -S superbuild -B build/deps -DBUILD_VTKM=ON
 ```
 
 Windows (Assume you have Visual Studio 2022 installed, if not, change the generator to the one you have)
 ```powershell
-cd build
-cmake -S superbuild -B build/deps -G "Visual Studio 17 2022" -A x64
+cmake -S superbuild -B build/deps -G "Visual Studio 17 2022" -A x64 -DBUILD_VTKM=ON
 ```
 
 Then, for all platforms:

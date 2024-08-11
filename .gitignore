@@ -1,3 +1,4 @@
 build/
+build_old/
 .anari_deps/
 demo_output.png

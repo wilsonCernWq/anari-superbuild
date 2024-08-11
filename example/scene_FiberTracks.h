@@ -63,8 +63,8 @@ inline anari::World CreateFiberTracks(anari::Device d, std::string filename)
   std::cout << "min length: " << curve_length_min << std::endl;
 
   // Color Mapping //
-  vtkm::cont::ColorTable color_table(vtkm::cont::ColorTable::Preset::CoolToWarm);
-  color_table.SetColorSpace(vtkm::ColorSpace::Diverging);
+  vtkm::cont::ColorTable color_table(vtkm::cont::ColorTable::Preset::RainbowDesaturated);
+  color_table.SetColorSpace(vtkm::ColorSpace::RGB);
 
   vtkm::cont::ColorTableSamplesRGB color_table_samples;
   color_table.Sample(256, color_table_samples);

@@ -125,8 +125,8 @@ struct Application : public anari_viewer::Application
 
     // Create a scene //
 
-    // auto w = anari::scenes::CreateCornellBox(g_device);
-    auto w = anari::scenes::CreateFiberTracks(g_device, "H:/fibertracks.vtk");
+    auto w = anari::scenes::CreateCornellBox(g_device);
+    // auto w = anari::scenes::CreateFiberTracks(g_device, "H:/fibertracks.vtk");
 
     viewport->setWorld(w, true);
     leditor->setWorlds({w});
