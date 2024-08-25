@@ -36,6 +36,43 @@
             ]
         },
         {
+            "name": "(gdb) DemoViewer",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/demoViewer",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "${env:LD_LIBRARY_PATH};${workspaceFolder}/build/deps/install/lib"
+                },
+                {
+                    "name": "ANARI_LIBRARY",
+                    "value": "${input:ANARI_LIBRARY}"
+                },
+                {
+                    "name": "DISPLAY",
+                    "value": ":2"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "(Windows) Demo",
             "type": "cppvsdbg",
             "request": "launch",

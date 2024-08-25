@@ -21,6 +21,8 @@
 namespace anari {
 namespace scenes {
 
+static vtkm::cont::DataSet ds;
+
 // FiberTrack definitions //////////////////////////////////////////////////////
 inline anari::World CreateFiberTracks(anari::Device d, std::string filename)
 {
@@ -31,7 +33,7 @@ inline anari::World CreateFiberTracks(anari::Device d, std::string filename)
   // Load Dataset
   printf("loading ... %s", filename.c_str());
   vtkm::io::PolyLineDataReader reader(filename.c_str());
-  static auto ds = reader.ReadDataSet();
+  ds = reader.ReadDataSet();
   ds.PrintSummary(std::cout);
   std::cout << std::endl;
 
